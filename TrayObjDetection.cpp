@@ -451,7 +451,7 @@ const char *help_message = "\n\
 press one of the following keys to do what you want:\n\
     q: quit this program\n\
     0: zero adjustment\n\
-    d: detect objects on the tray\n\
+    d: run object detectection on the tray\n\
     s: start or stop generating and inserting sensor data for simulation\n\
     h: display this help message\n\
 ";
@@ -460,7 +460,7 @@ const char *help_message = "\n\
 press one of the following keys to do what you want:\n\
     q: quit this program\n\
     0: zero adjustment\n\
-    d: detect objects on the tray\n\
+    d: run object detectection on the tray\n\
     h: display this help message\n\
 ";
 #endif
