@@ -1,6 +1,9 @@
 # Tray Object Detection
 
 Tray Object Detection using STM's ToF sensor, VL53L7CX
+This code includes the following:
+- ToF sensor simulation with random data
+- Tray Object Detection
 
 ## Table of Contents
 
@@ -15,7 +18,7 @@ g++ -std=c++14 -I ./src -I (boost include directory) -o a.out ToFSensor.cpp Tray
 <br>
 in case of macOS with latest boost installed by brew:<br>
 (boost include directory) = /opt/homebrew/Cellar/boost/1.81.0_1/include<br>
-- boost is used for calculating critical values for t-test, which might be obtained through a t-table eventually removing the need for this lib.
+- boost is used for calculating critical values for t-test, which might be obtained through a t-table removing the need for this lib.
 
 ## Usage
 
