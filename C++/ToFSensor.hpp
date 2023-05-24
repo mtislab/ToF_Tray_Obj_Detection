@@ -1,8 +1,21 @@
-#ifndef TOFSENSOR_H
-#define TOFSENSOR_H
+#ifndef TOFSENSOR_HPP
+#define TOFSENSOR_HPP
 
 #include <cstdint>
 #include "vl53l7cx_api.h" // for preprocessor definitions
+
+#define TOF_OBSERVE_TIME 2 // length of time to observe ToF data(s)
+#define TOF_DATA_RATE 10 // frequency at which data is published(Hz)
+
+// total number of data(intensity and distance) size will be 
+// NUM_SENSORS * NUM_ZONES * NUM_DATA * sizeof(ToFSensorData) << isn't it too big?
+
+#define TOF_ZONE_SIZE 8 // ToF sensor zone size
+#define TOF_NUM_TPZ VL53L7CX_NB_TARGET_PER_ZONE // number of targets per zone
+#define TOF_NUM_SENSORS 6 // number of ToF sensors used in object detection
+#define TOF_NUM_ZONES (TOF_ZONE_SIZE * TOF_ZONE_SIZE * TOF_NUM_TPZ) // 64(8x8) or 16(4x4): number of ToF sensor zones
+#define TOF_NUM_TARGETS (TOF_NUM_ZONES * TOF_NUM_TPZ) // total number of targets
+#define TOF_NUM_DATA (TOF_OBSERVE_TIME * TOF_DATA_RATE)
 
 // sensor data 
 typedef struct _ToFSensorData {
@@ -23,27 +36,27 @@ typedef struct _ToFSensorData {
 
   //* Signal returned to the sensor in kcps/spads 
 #ifndef VL53L7CX_DISABLE_SIGNAL_PER_SPAD
-  uint32_t signal_per_spad[VL53L7CX_NB_TARGET_PER_ZONE];
+  uint32_t signal_per_spad[TOF_NUM_TPZ];
 #endif
 
   //* Sigma of the current distance in mm 
 #ifndef VL53L7CX_DISABLE_RANGE_SIGMA_MM
-  uint16_t range_sigma_mm[VL53L7CX_NB_TARGET_PER_ZONE];
+  uint16_t range_sigma_mm[TOF_NUM_TPZ];
 #endif
 
   //* Measured distance in mm 
 #ifndef VL53L7CX_DISABLE_DISTANCE_MM
-  int16_t distance_mm[VL53L7CX_NB_TARGET_PER_ZONE];
+  int16_t distance_mm[TOF_NUM_TPZ];
 #endif
 
   //* Estimated reflectance in percent 
 #ifndef VL53L7CX_DISABLE_REFLECTANCE_PERCENT
-  uint8_t reflectance[VL53L7CX_NB_TARGET_PER_ZONE];
+  uint8_t reflectance[TOF_NUM_TPZ];
 #endif
 
   //* Status indicating the measurement validity (5 & 9 means ranging OK)
 #ifndef VL53L7CX_DISABLE_TARGET_STATUS
-  uint8_t target_status[VL53L7CX_NB_TARGET_PER_ZONE];
+  uint8_t target_status[TOF_NUM_TPZ];
 #endif
 } ToFSensorData;
 
@@ -71,17 +84,6 @@ typedef struct _ToFSensorData {
     A status of 6 or 9 can be considered with a confidence value of 50 %. 
     All other statuses are below 50 % confidence level.
 */
-
-#define TOF_OBSERVE_TIME 2 // length of time to observe ToF data(s)
-#define TOF_DATA_RATE 10 // frequency at which data is published(Hz)
-
-// total number of data(intensity and distance) size will be 
-// NUM_SENSORS * NUM_ZONES * NUM_DATA * sizeof(ToFSensorData) << isn't it too big?
-
-#define TOF_ZONE_SIZE 8 // ToF sensor zone size
-#define TOF_NUM_SENSORS 6 // number of ToF sensors used in object detection
-#define TOF_NUM_ZONES (TOF_ZONE_SIZE * TOF_ZONE_SIZE) // 64(8x8) or 16(4x4): number of ToF sensor zones
-#define TOF_NUM_DATA (TOF_OBSERVE_TIME * TOF_DATA_RATE)
 
 #define USE_DYNAMIC_ALLOC_FOR_SENSOR_DATA 1
 

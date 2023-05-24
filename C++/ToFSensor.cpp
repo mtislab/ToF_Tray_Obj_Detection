@@ -68,29 +68,29 @@ ToFSensor::~ToFSensor() {
 #if USE_DYNAMIC_ALLOC_FOR_SENSOR_DATA
 
 void ToFSensor::init_sensor_data() {
-    the_sensor_data = (ToFSensorData***) calloc(TOF_NUM_SENSORS, sizeof(ToFSensorData*));
-    if(the_sensor_data == NULL) {
+    the_sensor_data_common = (ToFSensorData***) calloc(TOF_NUM_SENSORS, sizeof(ToFSensorData*));
+    if(the_sensor_data_common == NULL) {
         cout << "Memory allocation failed.\n";
         exit(1);
     }
 
     for(int i = 0; i < TOF_NUM_SENSORS; i++) {
-        the_sensor_data[i] = (ToFSensorData**) calloc(TOF_NUM_ZONES, sizeof(ToFSensorData*));
-        if(the_sensor_data[i] == NULL) {
+        the_sensor_data_common[i] = (ToFSensorData**) calloc(TOF_NUM_ZONES, sizeof(ToFSensorData*));
+        if(the_sensor_data_common[i] == NULL) {
             cout << "Memory allocation failed.\n";
             exit(1);
         }
 
         for(int j = 0; j < TOF_NUM_ZONES; j++) {
-            the_sensor_data[i][j] = (ToFSensorData*) calloc(TOF_NUM_DATA, sizeof(ToFSensorData));
-            if(the_sensor_data[i][j] == NULL) {
+            the_sensor_data_common[i][j] = (ToFSensorData*) calloc(TOF_NUM_DATA, sizeof(ToFSensorData));
+            if(the_sensor_data_common[i][j] == NULL) {
                 cout << "Memory allocation failed.\n";
                 exit(1);
             }
 
             // // already zero initialized by calloc: no need for the following default_data assignment
             // for(int k = 0; k < TOF_NUM_DATA; k++) {
-            //     the_sensor_data[i][j][k] = default_data;
+            //     the_sensor_data_common[i][j][k] = default_data;
             // }
         }
     }
@@ -104,16 +104,16 @@ void ToFSensor::init_sensor_data() {
 void ToFSensor::free_sensor_data() {
     for(int i = 0; i < TOF_NUM_SENSORS; i++) {
         for(int j = 0; j < TOF_NUM_ZONES; j++) {
-            if(the_sensor_data[i][j] != NULL)
-                free(the_sensor_data[i][j]);
+            if(the_sensor_data_common[i][j] != NULL)
+                free(the_sensor_data_common[i][j]);
         }
 
-        if(the_sensor_data[i] != NULL)
-            free(the_sensor_data[i]);
+        if(the_sensor_data_common[i] != NULL)
+            free(the_sensor_data_common[i]);
     }
 
-    if(the_sensor_data != NULL)
-        free(the_sensor_data);
+    if(the_sensor_data_common != NULL)
+        free(the_sensor_data_common);
 
     cout << "free_sensor_data successful\n";
 }
@@ -124,11 +124,11 @@ void ToFSensor::init_sensor_data() {
     // for(int i = 0; i < TOF_NUM_SENSORS; i++) {
     //     for(int j = 0; j < TOF_NUM_DATA; j++) {
     //         for(int k = 0; k < TOF_NUM_ZONES; k++) {
-    //             the_sensor_data[i][j][k] = default_data;
+    //             the_sensor_data_common[i][j][k] = default_data;
     //         }
     //     }
     // }
-    memset(the_sensor_data, 0, sizeof(ToFSensorData) * TOF_NUM_SENSORS * TOF_NUM_ZONES * TOF_NUM_DATA);
+    memset(the_sensor_data_common, 0, sizeof(ToFSensorData) * TOF_NUM_SENSORS * TOF_NUM_ZONES * TOF_NUM_DATA);
 
     memset(sensor_data_head, 0, TOF_NUM_SENSORS);
     memset(sensor_data_tail, -1, TOF_NUM_SENSORS);
@@ -145,13 +145,13 @@ void ToFSensor::free_sensor_data() {
 #endif
 
 void ToFSensor::clear_sensor_data() {
-    if(the_sensor_data == NULL) {
+    if(the_sensor_data_common == NULL) {
         init_sensor_data();
     } else {
         for(int i = 0; i < TOF_NUM_SENSORS; i++) {
             for(int j = 0; j < TOF_NUM_ZONES; j++) {
                 for(int k = 0; k < TOF_NUM_DATA; k++) {
-                    the_sensor_data[i][j][k] = default_data;
+                    the_sensor_data_common[i][j][k] = default_data;
                 }
             }
         }
@@ -175,43 +175,43 @@ void ToFSensor::insert_sensor_data(int iSensor, VL53L7CX_ResultsData* sensor_dat
     for(int i = 0; i < TOF_NUM_ZONES; i++) {
         //* Ambient noise in kcps/spads 
         #ifndef VL53L7CX_DISABLE_AMBIENT_PER_SPAD
-        the_sensor_data[iSensor][i][next_tail].ambient_per_spad = sensor_data->ambient_per_spad[i];
+        the_sensor_data_common[iSensor][i][next_tail].ambient_per_spad = sensor_data->ambient_per_spad[i];
         #endif
 
         //* Number of valid target detected for 1 zone 
         #ifndef VL53L7CX_DISABLE_NB_TARGET_DETECTED
-        the_sensor_data[iSensor][i][next_tail].nb_target_detected = sensor_data->nb_target_detected[i];
+        the_sensor_data_common[iSensor][i][next_tail].nb_target_detected = sensor_data->nb_target_detected[i];
         #endif
 
         //* Number of spads enabled for this ranging 
         #ifndef VL53L7CX_DISABLE_NB_SPADS_ENABLED
-        the_sensor_data[iSensor][i][next_tail].nb_spads_enabled = sensor_data->nb_spads_enabled[i];
+        the_sensor_data_common[iSensor][i][next_tail].nb_spads_enabled = sensor_data->nb_spads_enabled[i];
         #endif
 
         //* Signal returned to the sensor in kcps/spads 
         #ifndef VL53L7CX_DISABLE_SIGNAL_PER_SPAD
-        memcpy(the_sensor_data[iSensor][i][next_tail].signal_per_spad, sensor_data->signal_per_spad + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint32_t) * VL53L7CX_NB_TARGET_PER_ZONE);
+        memcpy(the_sensor_data_common[iSensor][i][next_tail].signal_per_spad, sensor_data->signal_per_spad + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint32_t) * VL53L7CX_NB_TARGET_PER_ZONE);
         #endif
 
         //* Sigma of the current distance in mm 
         #ifndef VL53L7CX_DISABLE_RANGE_SIGMA_MM
-        memcpy(the_sensor_data[iSensor][i][next_tail].range_sigma_mm, sensor_data->range_sigma_mm + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint16_t) * VL53L7CX_NB_TARGET_PER_ZONE);
+        memcpy(the_sensor_data_common[iSensor][i][next_tail].range_sigma_mm, sensor_data->range_sigma_mm + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint16_t) * VL53L7CX_NB_TARGET_PER_ZONE);
         #endif
 
         //* Measured distance in mm 
         #ifndef VL53L7CX_DISABLE_DISTANCE_MM
-        memcpy(the_sensor_data[iSensor][i][next_tail].distance_mm, sensor_data->distance_mm + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint16_t) * VL53L7CX_NB_TARGET_PER_ZONE);
+        memcpy(the_sensor_data_common[iSensor][i][next_tail].distance_mm, sensor_data->distance_mm + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint16_t) * VL53L7CX_NB_TARGET_PER_ZONE);
         #endif
 
         //* Estimated reflectance in percent 
         #ifndef VL53L7CX_DISABLE_REFLECTANCE_PERCENT
-        memcpy(the_sensor_data[iSensor][i][next_tail].reflectance, sensor_data->reflectance + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint8_t) * VL53L7CX_NB_TARGET_PER_ZONE);
+        memcpy(the_sensor_data_common[iSensor][i][next_tail].reflectance, sensor_data->reflectance + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint8_t) * VL53L7CX_NB_TARGET_PER_ZONE);
         uint8_t reflectance[VL53L7CX_NB_TARGET_PER_ZONE];
         #endif
 
         //* Status indicating the measurement validity (5 & 9 means ranging OK)
         #ifndef VL53L7CX_DISABLE_TARGET_STATUS
-        memcpy(the_sensor_data[iSensor][i][next_tail].target_status, sensor_data->target_status + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint8_t) * VL53L7CX_NB_TARGET_PER_ZONE);
+        memcpy(the_sensor_data_common[iSensor][i][next_tail].target_status, sensor_data->target_status + i * VL53L7CX_NB_TARGET_PER_ZONE, sizeof(uint8_t) * VL53L7CX_NB_TARGET_PER_ZONE);
         #endif
     }
 
@@ -229,12 +229,12 @@ void ToFSensor::copy_sensor_data(ToFSensorData dest[TOF_NUM_SENSORS][TOF_NUM_ZON
     for(int i = 0; i < TOF_NUM_SENSORS; i++) {
         for(int j = 0; j < TOF_NUM_ZONES; j++) {
             for(int k = 0; k < TOF_NUM_DATA; k++) {
-                memcpy(dest[i][j]+k, the_sensor_data[i][j]+k, sizeof(ToFSensorData));
+                memcpy(dest[i][j]+k, the_sensor_data_common[i][j]+k, sizeof(ToFSensorData));
             }
         }
     }
 #else
-    memcpy(dest, the_sensor_data, sizeof(ToFSensorData) * TOF_NUM_SENSORS * TOF_NUM_ZONES * TOF_NUM_DATA);
+    memcpy(dest, the_sensor_data_common, sizeof(ToFSensorData) * TOF_NUM_SENSORS * TOF_NUM_ZONES * TOF_NUM_DATA);
 #endif
 }
 

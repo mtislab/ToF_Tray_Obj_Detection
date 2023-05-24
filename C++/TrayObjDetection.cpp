@@ -16,10 +16,33 @@
 
 using namespace std;
 
+
+// trayMask: specifies ROI(ToF zones) where the signal is supposed to be reflected from the tray
+int trayMask[TOF_NUM_SENSORS][TOF_NUM_ZONES] = {
+    // sensor #1
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    // sensor #2
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    // sensor #3
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    // sensor #4
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    // sensor #5
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    // sensor #6
+    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 
+     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
+}; // two dimensional array of zones to detect object existence.
+
 // ----------------------------- sensor data simulation -----------------------------
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-#if 1 // to shrink code block in vscode
+#if 1 // code block mark: sensor data simulation
 #define USE_TOF_SENSOR_SIMULATION 1
 
 ToFSensor *the_sensor = NULL;
@@ -87,11 +110,9 @@ void insert_sensor_data() {
     if(!the_sensor) cout << "ToF sensor is not connected!" << endl;
     printf("inserting sensor data\n");
     for(int iSensor = 0; iSensor < TOF_NUM_SENSORS; iSensor++) {
-        for(int iZone = 0; iZone < TOF_NUM_ZONES; iZone++) {
-            VL53L7CX_ResultsData data;
-            makeRandomToFSensorData(&data);
-            the_sensor->insert_sensor_data(iSensor, &data);
-        }
+        VL53L7CX_ResultsData data;
+        makeRandomToFSensorData(&data);
+        the_sensor->insert_sensor_data(iSensor, &data);
     }
 }
 
@@ -154,34 +175,15 @@ void stop_sensor_simulation() {
 bool is_sensor_simulation_running() {
     return !stop_sensor_data_insert_flag;
 }
-#endif
 
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // ----------------------------- sensor data simulation -----------------------------
+#endif
 
-// trayMask: specifies ROI(ToF zones) where the signal is supposed to be reflected from the tray
-int trayMask[TOF_NUM_SENSORS][TOF_NUM_ZONES] = {
-    // sensor #1
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    // sensor #2
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    // sensor #3
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    // sensor #4
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    // sensor #5
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    // sensor #6
-    {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-     1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1}
-}; // two dimensional array of zones to detect object existence.
+// --------------------------------- zero adjustment --------------------------------
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-ToFSensorData zeroData[TOF_NUM_SENSORS][TOF_NUM_ZONES][TOF_NUM_DATA];
+ToFSensorData zeroData_common[TOF_NUM_SENSORS][TOF_NUM_ZONES][TOF_NUM_DATA];
 ToFSensorData currentData[TOF_NUM_SENSORS][TOF_NUM_ZONES][TOF_NUM_DATA];
 
 void printZeroData(int field_to_print) {
@@ -193,7 +195,7 @@ void printZeroData(int field_to_print) {
 #ifndef VL53L7CX_DISABLE_AMBIENT_PER_SPAD
                 case 0:
                     for(int k = 0; k < VL53L7CX_RESOLUTION_8X8; k++) {
-                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData[i][j][k].ambient_per_spad << ",";
+                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData_common[i][j][k].ambient_per_spad << ",";
                     }
                     cout << endl;
                     break;
@@ -203,7 +205,7 @@ void printZeroData(int field_to_print) {
 #ifndef VL53L7CX_DISABLE_NB_TARGET_DETECTED
                 case 1:
                     for(int k = 0; k < VL53L7CX_RESOLUTION_8X8; k++) {
-                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData[i][j][k].nb_target_detected << ",";
+                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData_common[i][j][k].nb_target_detected << ",";
                     }
                     cout << endl;
                     break;
@@ -213,7 +215,7 @@ void printZeroData(int field_to_print) {
 #ifndef VL53L7CX_DISABLE_NB_SPADS_ENABLED
                 case 2:
                     for(int k = 0; k < VL53L7CX_RESOLUTION_8X8; k++) {
-                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData[i][j][k].nb_spads_enabled << ",";
+                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData_common[i][j][k].nb_spads_enabled << ",";
                     }
                     cout << endl;
                     break;
@@ -223,7 +225,7 @@ void printZeroData(int field_to_print) {
 #ifndef VL53L7CX_DISABLE_SIGNAL_PER_SPAD
                 case 3:
                     for(int k = 0; k < VL53L7CX_RESOLUTION_8X8 * VL53L7CX_NB_TARGET_PER_ZONE; k++) {
-                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData[i][j][k].signal_per_spad << ",";
+                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData_common[i][j][k].signal_per_spad << ",";
                     }
                     cout << endl;
                     break;
@@ -233,7 +235,7 @@ void printZeroData(int field_to_print) {
 #ifndef VL53L7CX_DISABLE_RANGE_SIGMA_MM
                 case 4:
                     for(int k = 0; k < VL53L7CX_RESOLUTION_8X8 * VL53L7CX_NB_TARGET_PER_ZONE; k++) {
-                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData[i][j][k].range_sigma_mm << ",";
+                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData_common[i][j][k].range_sigma_mm << ",";
                     }
                     cout << endl;
                     break;
@@ -243,7 +245,7 @@ void printZeroData(int field_to_print) {
 #ifndef VL53L7CX_DISABLE_DISTANCE_MM
                 case 5:
                     for(int k = 0; k < VL53L7CX_RESOLUTION_8X8 * VL53L7CX_NB_TARGET_PER_ZONE; k++) {
-                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData[i][j][k].distance_mm << ",";
+                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData_common[i][j][k].distance_mm << ",";
                     }
                     cout << endl;
                     break;
@@ -253,7 +255,7 @@ void printZeroData(int field_to_print) {
 #ifndef VL53L7CX_DISABLE_REFLECTANCE_PERCENT
                 case 6:
                     for(int k = 0; k < VL53L7CX_RESOLUTION_8X8 * VL53L7CX_NB_TARGET_PER_ZONE; k++) {
-                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData[i][j][k].reflectance << ",";
+                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData_common[i][j][k].reflectance << ",";
                     }
                     cout << endl;
                     break;
@@ -263,7 +265,7 @@ void printZeroData(int field_to_print) {
 #ifndef VL53L7CX_DISABLE_TARGET_STATUS
                 case 7:
                     for(int k = 0; k < VL53L7CX_RESOLUTION_8X8 * VL53L7CX_NB_TARGET_PER_ZONE; k++) {
-                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData[i][j][k].target_status << ",";
+                        cout << "0x" << hex << setfill('0') << setw(2) << zeroData_common[i][j][k].target_status << ",";
                     }
                     cout << endl;
                     break;
@@ -297,7 +299,7 @@ void doZeroAdjustment() {
 
 void acquireZeroData() {
     if(the_sensor) 
-        the_sensor->copy_sensor_data(zeroData);
+        the_sensor->copy_sensor_data(zeroData_common);
 }
 
 void zero_adjustment_thread_function(int someArg=0) {
@@ -417,7 +419,7 @@ void startObjectDetection() {
         the_sensor->copy_sensor_data(currentData);
 
     for(int i = 0; i < TOF_NUM_SENSORS; i++) {
-        detectObjectOnTray(i, currentData, zeroData);
+        detectObjectOnTray(i, currentData, zeroData_common);
     }
 }
 
@@ -483,7 +485,7 @@ int main(int argc, char** argv) {
                 startObjectDetection();
                 break;
             case 'h':
-                printf("%s\n", help_message);
+                cout << help_message << endl;
                 break;
 #if USE_TOF_SENSOR_SIMULATION
             case 's':
@@ -508,7 +510,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    printf("terminating the program ......\n");
+    cout << "terminating the program ......\n";
 
     return 0;
 }
